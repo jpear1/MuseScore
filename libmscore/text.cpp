@@ -84,7 +84,7 @@ WrappedText::WrappedText(const TextBase& tex, qreal w)
       _original.textBlockList() = const_cast<TextBase&>(tex).textBlockList();
       _text.textBlockList().clear();
       QFontMetricsF fm(_text.font());
-      qreal lineLen;
+      qreal lineLen = 0;
       int wrappedRow = 0, wrappedCol = 0, origRow = 0, origCol = 0;
 
       for (const TextBlock& t : _original.textBlockList()) {
@@ -108,7 +108,7 @@ WrappedText::WrappedText(const TextBase& tex, qreal w)
                    else {
                          TextFragment back;
                          lineLen -= fm.horizontalAdvance(frag.text);
-                         int col = 0, idx = 0, lastWordCol = 0, lastWordColCount = 0;
+                         int fragCol = 0, fragIdx = 0, lastWordCol = 0, lastWordColCount = 0;
                          qreal lastWordLen = 0;
                          bool prevCharIsSpace = false;
                          QString s = frag.text;
@@ -119,20 +119,20 @@ WrappedText::WrappedText(const TextBase& tex, qreal w)
                                      ++lastWordColCount;
                                      }
                                else if (prevCharIsSpace) {
-                                     lastWordCol = col;
+                                     lastWordCol = fragCol;
                                      lastWordLen = 0;
                                      lastWordColCount = 0;
                                      prevCharIsSpace = false;
                                      }
                                else {
-                                     if (c.isLowSurrogate())
-                                           ++lastWordColCount;
+                                     ++lastWordColCount;
                                      lastWordLen += fm.horizontalAdvance(c);
                                      }
 
                                lineLen += fm.horizontalAdvance(c);
-                               if (lineLen > w) {
-                                     back = frag.split(lastWordCol != 0 ? lastWordCol : col);
+
+                               if (lineLen > w && c != ' ') {
+                                     back = frag.split(lastWordCol != 0 ? lastWordCol : fragCol);
                                      for (int i = 0; i < frag.columns(); ++i) {
                                            posMap.push_back({origRow, origCol, wrappedRow, wrappedCol});
                                            ++wrappedCol;
@@ -143,25 +143,27 @@ WrappedText::WrappedText(const TextBase& tex, qreal w)
                                      _text.appendTextBlock();
                                      _text.textBlockList().last().setEol(true);
                                      ++wrappedRow;
-                                     col = idx = wrappedCol = 0;
+                                     fragCol = fragIdx = wrappedCol = 0;
                                      lineLen = fm.horizontalAdvance(c);
                                      if (lastWordCol != 0) {
-                                           col = idx = lastWordColCount;
+                                           fragCol = fragIdx = lastWordColCount;
                                            lineLen += lastWordLen;
                                            }
                                      lastWordCol = lastWordColCount = lastWordLen = 0;
                                      frag = back;
                                      }
-                               ++idx;
+                               ++fragIdx;
                                if (c.isHighSurrogate())
                                      continue;
-                               ++col;
+                               ++fragCol;
                                }
+
                          for (int i = 0; i < frag.columns(); ++i) {
                                posMap.push_back({origRow, origCol, wrappedRow, wrappedCol});
                                ++wrappedCol;
                                ++origCol;
                                }
+
                          posMap.push_back({origRow, origCol, wrappedRow, wrappedCol});
                          lineLen = fm.horizontalAdvance(frag.text);
                          _text.appendFragment(frag);
