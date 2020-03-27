@@ -24,18 +24,12 @@ class WrappedText;
 //   Text
 //---------------------------------------------------------
 
-class Text final: public TextBase {
+class Text final : public TextBase {
 
    public:
       Text(Score* s = 0, Tid tid = Tid::DEFAULT);
       Text(const TextBase&);
 
-<<<<<<< HEAD
-      ElementType type() const override    { return ElementType::TEXT; }
-      Text* clone() const override         { return new Text(*this); }
-      void read(XmlReader&) override;
-      QVariant propertyDefault(Pid id) const override;
-=======
       virtual ElementType type() const override    { return ElementType::TEXT; }
       virtual Text* clone() const override         { return new Text(*this); }
       virtual void read(XmlReader&) override;
@@ -65,7 +59,6 @@ class WrappedText {
       TextCursor translatedToWrapped(const TextCursor&);
       TextCursor translatedToOriginal(const TextCursor&);
       Text& text()  { return _text; }
->>>>>>> moved implemetation to own class
       };
 
 }     // namespace Ms
