@@ -86,7 +86,7 @@ WrappedText::WrappedText(const TextBase& tex, qreal w)
       QFontMetricsF fm(_text.font());
       qreal lineLen = 0;
       int wrappedRow = 0, wrappedCol = 0, origRow = 0, origCol = 0;
-
+      
       for (const TextBlock& t : _original.textBlockList()) {
             _text.appendTextBlock();
             _text.textBlockList().last().setEol(true);
@@ -171,7 +171,9 @@ WrappedText::WrappedText(const TextBase& tex, qreal w)
                    ++wrappedRow;
                    ++origRow;
                    }
+            _text.textBlockList().last().setEol(t.eol());
             }
+
             posMap.push_back({origRow - 1, origCol, wrappedRow - 1, wrappedCol});
             posMap.push_back({origRow, 0, wrappedRow, 0});
             _text.layout();
